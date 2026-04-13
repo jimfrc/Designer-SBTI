@@ -8,8 +8,9 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   ChevronRight, 
   RotateCcw, 
-  Share2, 
-  Download, 
+  User, 
+  Heart, 
+  X,
   Trophy, 
   Zap, 
   Sparkles
@@ -65,6 +66,8 @@ export default function App() {
   const [answers, setAnswers] = useState<Record<number, 'L' | 'M' | 'H'>>({});
   const [result, setResult] = useState<Personality | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [showQrModal, setShowQrModal] = useState(false);
+  const [qrCodeType, setQrCodeType] = useState<'contact' | 'support'>('contact');
 
   // --- Logic ---
 
@@ -359,25 +362,61 @@ export default function App() {
 
         {/* Actions */}
         <div className="mt-12 flex flex-wrap justify-center gap-4 max-w-md w-full">
-          <button 
-            onClick={() => {}} 
+          <button
+            onClick={() => { setQrCodeType('contact'); setShowQrModal(true); }}
             className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-white border-2 border-black font-bold rounded-2xl hover:bg-zinc-100 transition-colors"
           >
-            <Share2 className="w-5 h-5" /> 分享卡牌
+            <User className="w-5 h-5" /> 联系作者
           </button>
-          <button 
-            onClick={() => {}} 
+          <button
+            onClick={() => { setQrCodeType('support'); setShowQrModal(true); }}
             className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-white border-2 border-black font-bold rounded-2xl hover:bg-zinc-100 transition-colors"
           >
-            <Download className="w-5 h-5" /> 保存图片
+            <Heart className="w-5 h-5" /> 赞赏作者
           </button>
-          <button 
-            onClick={reset} 
+          <button
+            onClick={reset}
             className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-black text-white font-bold rounded-2xl hover:bg-zinc-800 transition-colors"
           >
             <RotateCcw className="w-5 h-5" /> 重新测试
           </button>
         </div>
+
+        {/* QR Code Modal */}
+        <AnimatePresence>
+          {showQrModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-6"
+              onClick={() => setShowQrModal(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.8, opacity: 0 }}
+                className="bg-white rounded-3xl p-6 max-w-sm w-full relative"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  onClick={() => setShowQrModal(false)}
+                  className="absolute top-3 right-3 p-2 hover:bg-zinc-100 rounded-full transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+                <img
+                  src={qrCodeType === 'contact' ? '/src/source/qrcode2.png' : '/src/source/qrcode1.png'}
+                  alt={qrCodeType === 'contact' ? '联系作者' : '赞赏作者'}
+                  className="w-full rounded-2xl"
+                />
+                <p className="text-center mt-4 font-bold text-lg">
+                  {qrCodeType === 'contact' ? '扫码联系作者' : '扫码赞赏作者'}
+                </p>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     );
   };
