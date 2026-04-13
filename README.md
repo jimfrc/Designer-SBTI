@@ -1,7 +1,7 @@
-# Designer SBTI - 设计师人格卡牌测试
+# Designer NMTI - 设计师人格卡牌测试
 
 <div align="center">
-  <img width="800" alt="Designer SBTI Banner" src="https://img.shields.io/badge/Designer%20SBTI-Vibe%20Coding-FF6B6B?style=for-the-badge&logo=figma&logoColor=white" />
+  <img width="800" alt="Designer NMTI Banner" src="https://img.shields.io/badge/Designer%20NMTI-Vibe%20Coding-FF6B6B?style=for-the-badge&logo=figma&logoColor=white" />
 </div>
 
 > 基于 Vibe Coding 开发，解构设计师职场痛点的趣味性格卡牌测试
@@ -33,8 +33,8 @@
 
 ```bash
 # 克隆项目
-git clone https://github.com/YOUR_USERNAME/designer-sbti.git
-cd designer-sbti
+git clone https://github.com/YOUR_USERNAME/designer-nmti.git
+cd designer-nmti
 
 # 安装依赖
 npm install
@@ -65,7 +65,7 @@ npm run preview
 ## 📁 项目结构
 
 ```
-designer-sbti/
+designer-nmti/
 ├── src/
 │   ├── App.tsx           # 主应用组件
 │   ├── constants.ts      # 题库和人格数据

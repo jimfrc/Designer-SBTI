@@ -152,27 +152,48 @@ export default function App() {
         }
       });
 
+      // 根据甲抗性确定人格类型
+      const userJiaKang = avgTraits['甲抗性'];
+      type JiaKangTier = 'high' | 'medium' | 'low';
+      const jiaKangTier: JiaKangTier = userJiaKang > 80 ? 'high' : userJiaKang < 20 ? 'low' : 'medium';
+
+      // 获取甲抗性对应区间的人格
+      const getPersonalityByJiaKangTier = (tier: JiaKangTier) => {
+        return PERSONALITIES.filter(p => {
+          const jiaKangValue = p.stats.find(s => s.label === '甲抗性')?.value || 50;
+          if (tier === 'high') return jiaKangValue > 80;
+          if (tier === 'low') return jiaKangValue < 20;
+          return jiaKangValue >= 20 && jiaKangValue <= 80;
+        });
+      };
+
+      const tierPersonas = getPersonalityByJiaKangTier(jiaKangTier);
+
       // 根据稀有度权重随机选择结果
       // Common: 55%, Rare: 30%, Epic: 15%
       const rarityRoll = Math.random();
       let finalResult: Personality;
 
+      // 先按稀有度筛选，再在对应甲抗性区间内选择
+      let candidates: Personality[];
+
       if (rarityRoll < 0.55) {
-        // 选中 Common 人格（从问卷匹配和所有Common中加权选择）
-        const commonPersonas = PERSONALITIES.filter(p => p.rarity === 'Common');
-        // 问卷匹配结果权重更高
-        const weightedCommon = quizMatch.rarity === 'Common'
-          ? [quizMatch, ...commonPersonas.filter(p => p.id !== quizMatch.id)]
-          : commonPersonas;
-        finalResult = weightedCommon[Math.floor(Math.random() * weightedCommon.length)];
+        candidates = tierPersonas.filter(p => p.rarity === 'Common');
+        if (candidates.length === 0) candidates = PERSONALITIES.filter(p => p.rarity === 'Common');
       } else if (rarityRoll < 0.85) {
-        // 选中 Rare 人格
-        const rarePersonas = PERSONALITIES.filter(p => p.rarity === 'Rare');
-        finalResult = rarePersonas[Math.floor(Math.random() * rarePersonas.length)];
+        candidates = tierPersonas.filter(p => p.rarity === 'Rare');
+        if (candidates.length === 0) candidates = PERSONALITIES.filter(p => p.rarity === 'Rare');
       } else {
-        // 选中 Epic 人格
-        const epicPersonas = PERSONALITIES.filter(p => p.rarity === 'Epic');
-        finalResult = epicPersonas[Math.floor(Math.random() * epicPersonas.length)];
+        candidates = tierPersonas.filter(p => p.rarity === 'Epic');
+        if (candidates.length === 0) candidates = PERSONALITIES.filter(p => p.rarity === 'Epic');
+      }
+
+      // 如果问卷匹配结果在候选列表中，增加其权重（优先选中）
+      const quizMatchInCandidates = candidates.find(p => p.id === quizMatch.id);
+      if (quizMatchInCandidates && Math.random() < 0.5) {
+        finalResult = quizMatch;
+      } else {
+        finalResult = candidates[Math.floor(Math.random() * candidates.length)];
       }
 
       setResult(finalResult);
@@ -206,7 +227,7 @@ export default function App() {
             Silly Big Personality Test
           </motion.div>
           <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-black leading-none">
-            DESIGNER <br /> SBTI
+            DESIGNER <br /> NMTI
           </h1>
           <p className="text-zinc-500 font-medium text-lg md:text-xl max-w-md mx-auto pt-4">
             基于 Vibe Coding 开发，解构设计师职场痛点的趣味性格卡牌测试。
@@ -215,7 +236,7 @@ export default function App() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-8">
           {[
-            { icon: <Zap className="w-5 h-5" />, text: "30道专业槽点题" },
+            { icon: <Zap className="w-5 h-5" />, text: "20道专业槽点题" },
             { icon: <Trophy className="w-5 h-5" />, text: "25种稀有人格" },
             { icon: <Sparkles className="w-5 h-5" />, text: "动态视觉卡牌" }
           ].map((item, i) => (
@@ -349,7 +370,7 @@ export default function App() {
             />
             <div className="absolute top-4 left-4">
               <div className="bg-black text-white px-3 py-1 text-sm font-black uppercase skew-x-[-12deg]">
-                {result.title}
+                {result.code}
               </div>
             </div>
             <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur px-2 py-1 border border-black text-[10px] font-mono">
@@ -360,6 +381,7 @@ export default function App() {
           {/* Card Content */}
           <div className="p-6 space-y-6">
             <div className="space-y-2">
+              <div className="text-xs font-black text-zinc-400 tracking-widest">{result.code}</div>
               <h3 className="text-2xl font-black uppercase leading-none">{result.title}</h3>
               <p className="text-zinc-500 text-sm font-medium italic">"{result.description}"</p>
             </div>
@@ -380,7 +402,7 @@ export default function App() {
                 <div className="w-6 h-6 bg-black rounded-sm" />
               </div>
               <div className="text-[10px] font-mono leading-tight">
-                DESIGNER SBTI<br />VER. 2026.04
+                DESIGNER NMTI<br />VER. 2026.04
               </div>
             </div>
             <div className="text-right">
